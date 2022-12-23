@@ -3,7 +3,7 @@ const exp=express()
 const mongoclient =require("mongodb").MongoClient;
 // exp.use(express.json);
 var database;
-var dbcollection="books";
+var dbcollection="names";
 
 //create database
 exp.get('/createDB/:dbname',(req,res,)=>{
@@ -12,26 +12,21 @@ exp.get('/createDB/:dbname',(req,res,)=>{
             database=result.db(`${req.params.dbname}`);
             console.log("sucessfully created database");
         });
-});
-
+    });
 
 //drop the database
 exp.get('/dropdatabase/:dbdel',(req,res)=>{
-    console.log(req.params.dbdel);
-    mongoclient.connect(`mongodb:/0.0.0.0:27017/${req.params.dbdel}`, (err, result)=>{
+    mongoclient.connect(`mongodb://0.0.0.0:27017//${req.params.dbdel}`, (err, result)=>{
         if(err) throw err;
-        db.dropDatabase((err,result)=>{
-            if(err) throw err;
-            res.send("sucessfully deleted"+result);
-        })
-    })
-});
-
-//create new collection 
-exp.get('/createcollection/:collname',(req,res)=>{
-    database.createCollection(`${req.params.collname}`,(err)=>{
-        if (err) throw err;
-            res.send("collection created...");
+        var dbs=result.db(`${req.params.dbdel}`);
+        console.log(dbs);
+        try{
+            dbs.dropDatabase();
+            res.send("database sucessfully deleted");
+        }
+        catch{
+            res.send("unable to delete database.....");
+        }
     })
 });
 
@@ -43,26 +38,43 @@ exp.get('/collections',(req,res)=>{
     })
 })
 
+//delete or remove collectiuon in database
+exp.get('/delcollection/:collname',(req,res)=>{
+    database.collection(`${req.params.collname}`).drop((err,result)=>{
+        if(err)throw err;
+        console.log(result);
+        res.send(result)
+    })
+})
+//create new collection 
+exp.get('/createcollection/:collname',(req,res)=>{
+    database.createCollection(`${req.params.collname}`,(err)=>{
+        if (err) throw err;
+            res.send("collection created...");
+    })
+});
+
 //insert value to the collections  
 exp.get('/insertcoll/:collname',(req,res)=>{
-    database.collection(`${req.params.collname}`).insertOne({"name":"suresh"},(err)=>{
+    // database.collection(`${req.params.collname}`).insertOne({"name":"suresh"},(err)=>{
+        database.collection(`${req.params.collname}`).insertMany([{"_id":62,"name":"surya","age":21},{"_id":63,"name":"manish","age":20},{"_id":61,"name":"kumari","age":20},{"_id":60,"name":"sara","age":21},],(err)=>{
         if(err) throw err;
         res.send("sucessfully Inserted....");
     });
 })
 
-//read from specific database
+//read from specific collection
 exp.get('/getData/:collname',(req,res)=>{
-    database.collection(`${req.params.collname}`).find({}).toArray((err,result)=>{
+    database.collection(`${req.params.collname}`).find().toArray((err,result)=>{
         if(err)throw err;
         res.send(result);
         console.log("Look At The 'Localhost:3000' FOr Result ...");
     });
 });
 
-//read from database
+//read from database 
 exp.get('/getData',(req,res)=>{
-    database.collection(dbcollection).find({}).toArray((err,result)=>{
+    database.collection(dbcollection).find({"age":21}).toArray((err,result)=>{
         if(err)throw err;
         res.send(result);
         console.log("Look At The 'Localhost:3000' FOr Result ...");
@@ -74,11 +86,40 @@ exp.get('/getData',(req,res)=>{
     // });
 });
 
+// to delete the value from the collection 
+exp.get('/delcollvalue/:collname',(req,res)=>{
+    database.collection(req.params.collname).deleteOne({"name":"suresh"},(err,result)=>{
+        if(err) throw err;
+        res.send("sucessfully deleted ...")
+    })
+})
+
+//drop the whole deteils in the table
+exp.get('/dropcoll/:collname',(req,res)=>{
+    database.collection(req.params.collname).drop((err,result)=>{
+        if(err)throw err;
+        if(result) res.send("sucessfully droped the datas in collection : "+req.params.collname);
+    })
+})
+
+//switch database 
+exp.get('/switchto/:dbname',(req,res)=>{
+
+    mongoclient.connect("mongodb://0.0.0.0:27017",(err,result)=>{
+        if (err) throw err;
+        if(database==result.db(req.params.dbname)){console.log("already on db"+req.params.dbname);}
+        database=result.db(req.params.dbname);
+        res.send("switched to db : "+req.params.dbname);
+    })
+})
+
+
 exp.listen(3000,()=>{
     mongoclient.connect("mongodb://0.0.0.0:27017", (err, result)=>{
     // mongoclient.connect("mongodb://0.0.0.0:27017",{useNewUrlParser:true},(err,result)=>{
         if(err) throw err;
         database=result.db("testdb");
+        console.log(database);
         console.log("Sucessfully connected with MongoDB . . .");
     });
 });
