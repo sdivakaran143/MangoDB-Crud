@@ -34,6 +34,7 @@ exp.get('/createcollection/:collname',(req,res)=>{
             res.send("collection created...");
     })
 });
+
 //list the collections in the database
 exp.get('/collections',(req,res)=>{
     database.listCollections().toArray((err,result)=>{
