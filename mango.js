@@ -16,16 +16,18 @@ exp.get('/createDB/:dbname',(req,res,)=>{
 
 //drop the database
 exp.get('/dropdatabase/:dbdel',(req,res)=>{
-    mongoclient.connect(`mongodb://0.0.0.0:27017//${req.params.dbdel}`, (err, result)=>{
+    mongoclient.connect(`mongodb://0.0.0.0:27017//`, (err, result)=>{
         if(err) throw err;
         var dbs=result.db(`${req.params.dbdel}`);
-        console.log(dbs);
+        // console.log(dbs);
         try{
             dbs.dropDatabase();
             res.send("database sucessfully deleted");
+            console.log("database sucessfully deleted");
         }
         catch{
             res.send("unable to delete database.....");
+            console.log("unable to delete database.....");
         }
     })
 });
@@ -107,9 +109,11 @@ exp.get('/switchto/:dbname',(req,res)=>{
 
     mongoclient.connect("mongodb://0.0.0.0:27017",(err,result)=>{
         if (err) throw err;
-        if(database==result.db(req.params.dbname)){console.log("already on db"+req.params.dbname);}
-        database=result.db(req.params.dbname);
-        res.send("switched to db : "+req.params.dbname);
+        if((database.databaseName)==(result.db(req.params.dbname).databaseName)){res.send("already on db : "+req.params.dbname);}
+        else{
+            database=result.db(req.params.dbname);
+            res.send("switched to db : "+req.params.dbname);
+        }
     })
 })
 
@@ -119,7 +123,7 @@ exp.listen(3000,()=>{
     // mongoclient.connect("mongodb://0.0.0.0:27017",{useNewUrlParser:true},(err,result)=>{
         if(err) throw err;
         database=result.db("testdb");
-        console.log(database);
+        // console.log(database);
         console.log("Sucessfully connected with MongoDB . . .");
     });
 });
