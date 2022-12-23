@@ -4,7 +4,9 @@ const mongoclient =require("mongodb").MongoClient;
 // exp.use(express.json);
 var database;
 var dbcollection="names";
-
+exp.get('/',(req,res)=>{
+    res.send("database connected .....");
+})
 //create database
 exp.get('/createDB/:dbname',(req,res,)=>{
         mongoclient.connect(`mongodb://0.0.0.0:27017/${req.params.dbname}`, (err, result)=>{
@@ -53,6 +55,7 @@ exp.get('/createcollection/:collname',(req,res)=>{
     database.createCollection(`${req.params.collname}`,(err)=>{
         if (err) throw err;
             res.send("collection created...");
+            dbcollection=req.params.collname;
     })
 });
 
@@ -76,7 +79,8 @@ exp.get('/getData/:collname',(req,res)=>{
 
 //read from database 
 exp.get('/getData',(req,res)=>{
-    database.collection(dbcollection).find({"age":21}).toArray((err,result)=>{
+    database.collection(dbcollection).find().toArray((err,result)=>{
+    // database.collection(dbcollection).find({"age":21}).toArray((err,result)=>{
         if(err)throw err;
         res.send(result);
         console.log("Look At The 'Localhost:3000' FOr Result ...");
@@ -117,6 +121,14 @@ exp.get('/switchto/:dbname',(req,res)=>{
     })
 })
 
+//switch collection
+exp.get('/switchcoll/:collname',(req,res)=>{
+    if(dbcollection==req.params.collname) res.send("Aldredy in collection "+req.params.collname);
+    else{
+        dbcollection=req.params.collname;
+        res.send("sucess fully switched to "+req.params.collname);
+    }
+})
 
 exp.listen(3000,()=>{
     mongoclient.connect("mongodb://0.0.0.0:27017", (err, result)=>{
