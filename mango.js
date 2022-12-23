@@ -4,6 +4,7 @@ const mongoclient =require("mongodb").MongoClient;
 // exp.use(express.json);
 var database;
 var dbcollection="books";
+
 //create database
 exp.get('/createDB/:dbname',(req,res,)=>{
         mongoclient.connect(`mongodb://0.0.0.0:27017/${req.params.dbname}`, (err, result)=>{
@@ -26,7 +27,6 @@ exp.get('/dropdatabase/:dbdel',(req,res)=>{
     })
 });
 
-
 //create new collection 
 exp.get('/createcollection/:collname',(req,res)=>{
     database.createCollection(`${req.params.collname}`,(err)=>{
@@ -43,7 +43,6 @@ exp.get('/collections',(req,res)=>{
     })
 })
 
-
 //insert value to the collections  
 exp.get('/insertcoll/:collname',(req,res)=>{
     database.collection(`${req.params.collname}`).insertOne({"name":"suresh"},(err)=>{
@@ -51,6 +50,7 @@ exp.get('/insertcoll/:collname',(req,res)=>{
         res.send("sucessfully Inserted....");
     });
 })
+
 //read from specific database
 exp.get('/getData/:collname',(req,res)=>{
     database.collection(`${req.params.collname}`).find({}).toArray((err,result)=>{
