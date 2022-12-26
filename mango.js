@@ -3,7 +3,7 @@ const exp=express()
 const mongoclient =require("mongodb").MongoClient;
 // exp.use(express.json);
 var database;
-var dbcollection="names";
+var dbcollection="books";
 
 //create database
 exp.get('/createDB/:dbname',(req,res,)=>{
@@ -127,3 +127,8 @@ exp.listen(3000,()=>{
         console.log("Sucessfully connected with MongoDB . . .");
     });
 });
+
+/*
+git config --global --unset user.name
+git config --global --unset user.email
+*/
